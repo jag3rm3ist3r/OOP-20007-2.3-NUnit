@@ -1,0 +1,297 @@
+﻿using System;
+using NUnit.Framework;
+using System.Collections.Generic;
+
+namespace _2._3P_NUnit
+{
+	[TestFixture]
+	public class Test_Identifiable_Object
+	{
+		private Identifiable_Object test_id;
+		private Item test_item;
+		private Inventory test_inventory;
+		private Player test_player;
+
+
+		[SetUp]
+		public void Setup()
+		{
+			test_id = new Identifiable_Object(new List<string> { "fred", "bob" });
+			test_item = new Item(new List<string> { "test", "sword", "steel" }, "A steel sword.", "A basic steel shortsword.");
+			test_inventory = new Inventory();
+			test_player = new Player("test", "This is just a test.");
+		}
+
+		// Identifyable object tests
+		// Test object is identifyable.
+		[Test]
+		public void Test_AreYou()
+		{
+			if (test_id.AreYou("fred"))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Test object does not identify as something else.
+		[Test]
+		public void Test_Not_AreYou()
+		{
+			if (test_id.AreYou("garbageinput"))
+			{
+				Assert.Fail();
+			}
+			else
+			{
+				Assert.Pass();
+			}
+		}
+
+		// Test object does not care about capital letters.
+		[Test]
+		public void Test_CaseSensitive()
+		{
+			if (test_id.AreYou("fREd"))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+		
+		// Test object can fetch it's first ID.
+		[Test]
+		public void Test_FirstID()
+		{
+			if (test_id.FirstId == "fred")
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Test object can accept new identifiers.
+		[Test]
+		public void Test_AddIdentifier()
+		{
+			test_id.AddIdentifier("wilma");
+			if (test_id.AreYou("wilma"))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+
+		// Item Unit Tests
+		// Test if item can be found by identifier.
+		[Test]
+		public void Test_ItemAreYou()
+		{
+			if(test_item.AreYou("sword"))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Returns correct item short description.
+		[Test]
+		public void Test_ShortItemDesc()
+		{
+			if(		test_item.ShortDescription.Equals("A steel sword. (test)")
+				&&	!test_item.ShortDescription.Equals("A banana (fruit)"))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Returns correct item description.
+		[Test]
+		public void Test_FullDescription()
+		{
+			if(		test_item.FullDescription.Equals("A basic steel shortsword.")
+				&&	!test_item.FullDescription.Equals("A banana made of grapes."))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+
+		// Inventory unit tests
+		// Inventory receives item which can then be fetched.
+		[Test]
+		public void Test_FindItem()
+		{
+			test_inventory.Put(test_item);
+			if( test_inventory.Fetch("test") != null )
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Item that isn't there isn't found.
+		[Test]
+		public void Test_NoItemFind()
+		{
+			test_inventory.Put(test_item);
+			if( test_inventory.Fetch("bananas") == null )
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Item remains after Fetch.
+		[Test]
+		public void Test_FetchItem()
+		{
+			test_inventory.Put(test_item);
+			test_inventory.Fetch("test");
+			if( test_inventory.Fetch("test") != null )
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Item doesn't remain after Take.
+		[Test]
+		public void Test_TakeItem()
+		{
+			test_inventory.Put(test_item);
+			test_inventory.Take("test");
+			if( test_inventory.Fetch("test") == null )
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Item lists correctly.
+		[Test]
+		public void Test_ItemList()
+		{
+			test_inventory.Put(test_item);
+			test_inventory.Put(test_item);
+			test_inventory.Put(test_item);
+			test_inventory.ItemList.Equals("\tA steel sword. (test)\n\tA steel sword. (test)\n\tA steel sword. (test)\n");
+		}
+
+
+		// Player unit tests
+		// Player responds to AreYou based on it's identifiers.
+		[Test]
+		public void Test_PlayerIsIdentifiable()
+		{
+			if( test_player.AreYou("me") )
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Player locates items in inventory.
+		[Test]
+		public void Test_PlayerLocatesItems()
+		{
+			test_player.Inventory.Put(test_item);
+			if ( test_player.Locate("sword") != null )
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Player locates itself.
+		[Test]
+		public void Test_PlayerLocatesItself()
+		{
+			if (test_player.Locate("me") != null)
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Player returns null when asked to locate something that doesn't exist.
+		[Test]
+		public void Test_PlayerLocatesNothing()
+		{
+			if (test_player.Locate("nothing") == null)
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+		// Player outputs full description.
+		[Test]
+		public void Test_PlayerFullDescription()
+		{
+			if (test_player.FullDescription.Equals("This is just a test."))
+			{
+				Assert.Pass();
+			}
+			else
+			{
+				Assert.Fail();
+			}
+		}
+
+
+		// Setup
+		public Test_Identifiable_Object()
+		{
+			Setup();
+		}
+	}
+}
